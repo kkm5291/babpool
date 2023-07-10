@@ -4,6 +4,7 @@ import ca.babpool.model.dto.CouponDto;
 import ca.babpool.model.dto.review.ReviewCommentDto;
 import ca.babpool.model.dto.review.ReviewDto;
 import ca.babpool.model.dto.review.ReviewResponseDto;
+import ca.babpool.model.entity.Coupon;
 import ca.babpool.model.response.ApiResponse;
 import ca.babpool.model.response.CommonResult;
 import ca.babpool.model.response.ListResult;
@@ -38,7 +39,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "사장님 댓글달기")
-    @PostMapping("/owner/{restaurantId}")
+    @PostMapping("/owner")
     public SingleResult<Integer> writeReviewComment(@RequestBody ReviewCommentDto dto) {
         return apiResponse.getSingleResult(reviewCommentService.insertOwnerComment(dto));
     }
@@ -50,7 +51,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "리뷰에서 단골쿠폰 발급")
-    @PostMapping("/owner/{restaurantId}/newCoupon")
+    @PostMapping("/owner/newCoupon")
     public CommonResult addCoupon(@RequestBody CouponDto couponDto) {
         return apiResponse.getSuccessResult(couponService.addNewCoupon(couponDto));
     }

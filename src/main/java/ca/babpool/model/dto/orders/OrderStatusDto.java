@@ -9,4 +9,5 @@ public class OrderStatusDto {
     private Long ordersId;
     private String orderDetailsStatus;
     private String orderDetailsPT;
+    private Long restaurantId;
 }

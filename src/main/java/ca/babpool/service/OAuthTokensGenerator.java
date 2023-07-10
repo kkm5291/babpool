@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class OAuthTokensGenerator {
 
     private static final String BEARER_TYPE = "Bearer ";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 300000000;
 
     private final JwtService jwtService;
     private final MemberMapper memberMapper;

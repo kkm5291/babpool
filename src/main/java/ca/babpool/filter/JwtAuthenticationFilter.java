@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 "/api/v1/like/member/create","/api/v1/like/member/delete",
 
-                "/swagger-ui/index.html"
+                "/swagger-ui/index.html", "/swagger-ui.html"
         );
 
         if (list.contains(request.getRequestURI())) {

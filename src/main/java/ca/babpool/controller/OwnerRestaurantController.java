@@ -71,12 +71,12 @@ public class OwnerRestaurantController {
 
     @Operation(summary = "레스토랑 신규주문 확인")
     @GetMapping("/{restaurantId}/newOrder")
-    public ListResult<RestaurantNewOrderResponseDto> findNewOrder(@PathVariable("restaurantId") Long restaurantId, @RequestParam("status") String status) {
+    public ListResult<RestaurantNewOrderResponseDto> findNewOrder(@PathVariable Long restaurantId, @RequestParam("status") String status) {
         return apiResponse.getListResult(restaurantService.getOrderDetailsByCurDateAndNew(restaurantId, status));
     }
 
     @Operation(summary = "주문 상태 변경")
-    @PostMapping("/{restaurantId}/changeStatus")
+    @PostMapping("/changeStatus")
     public CommonResult changeStatus(@RequestBody OrderStatusDto orderStatusDto) throws UnsupportedEncodingException, URISyntaxException, NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
         return apiResponse.getSuccessResult(restaurantService.updateOrderStatusToCooking(orderStatusDto));
     }

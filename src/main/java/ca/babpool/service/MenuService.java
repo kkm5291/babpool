@@ -1,6 +1,8 @@
 package ca.babpool.service;
 
+import ca.babpool.model.dto.menu.DeleteMenuDto;
 import ca.babpool.model.dto.menu.MenuDto;
+import ca.babpool.model.dto.menu.RepresentativeMenuDto;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,9 +16,9 @@ public interface MenuService {
 
     List<MenuDto> selectRepresentativeMenu(Long restaurantId);
 
-    int updateRepresentativeMenu(Map<String, List<Long>> menuIdList);
+    int updateRepresentativeMenu(RepresentativeMenuDto dto);
 
-    int deleteMenuByMenuId(Map<String, Long> menuId);
+    int deleteMenuByMenuId(DeleteMenuDto dto);
 
     List<MenuDto> selectAllMenuByRestaurantId(Long restaurantId);
     List<MenuDto> selectHideOrSoldOutMenu(Long restaurantId);

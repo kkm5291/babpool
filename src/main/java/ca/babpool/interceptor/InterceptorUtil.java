@@ -33,6 +33,10 @@ public class InterceptorUtil {
         return pathMatcher.extractUriTemplateVariables(path, url).get("restaurantId");
     }
 
+    public Long extractRestaurantId(String requestURI, String pattern) {
+        return Long.parseLong(extractPathVariable(requestURI, pattern));
+    }
+
     public Long parseRequestServletBody(HttpServletRequest request) throws IOException {
         String reqBody = (String) request.getAttribute("requestBody");
         Gson gson = new Gson();

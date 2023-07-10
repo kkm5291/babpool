@@ -2,6 +2,7 @@ package ca.babpool.controller;
 
 import ca.babpool.model.dto.restaurant.RestaurantNewOrderDto;
 import ca.babpool.model.response.ApiResponse;
+import ca.babpool.model.response.CommonResult;
 import ca.babpool.service.FCMNotificationService;
 import ca.babpool.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,8 +28,8 @@ public class OrderController {
 
     @Operation(summary = "레스토랑 신규주문")
     @PostMapping("/newOrder")
-    public void restaurantNewOrder(@RequestBody RestaurantNewOrderDto dto) {
-        orderService.insertNewOrder(dto);
-        fcmNotificationService.sendNotificationByToken(fcmNotificationService.createNotificationDto(dto));
+    public CommonResult restaurantNewOrder(@RequestBody RestaurantNewOrderDto dto) {
+//        fcmNotificationService.sendNotificationByToken(fcmNotificationService.createNotificationDto(dto));
+        return apiResponse.getSuccessResult(orderService.insertNewOrder(dto));
     }
 }

@@ -15,9 +15,11 @@ public class ReviewCommentDto {
     private Long reviewId;
     private String reviewcommentContent;
     private String memberId;
+    private Long restaurantId;
 
     public static ReviewCommentDto toDto(ReviewComment entity) {
         return ReviewCommentDto.builder()
+                .restaurantId(entity.getRestaurantId())
                 .reviewcommentId(entity.getReviewcommentId())
                 .reviewId(entity.getReviewId())
                 .reviewcommentContent(entity.getReviewcommentContent())

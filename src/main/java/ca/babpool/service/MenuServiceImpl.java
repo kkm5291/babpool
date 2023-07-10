@@ -1,7 +1,9 @@
 package ca.babpool.service;
 
 import ca.babpool.mapper.MenuMapper;
+import ca.babpool.model.dto.menu.DeleteMenuDto;
 import ca.babpool.model.dto.menu.MenuDto;
+import ca.babpool.model.dto.menu.RepresentativeMenuDto;
 import ca.babpool.model.entity.Menu;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,8 +48,8 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public int updateRepresentativeMenu(Map<String, List<Long>> menuIdList) {
-        List<Long> idList = menuIdList.get("checkedMenuIds");
+    public int updateRepresentativeMenu(RepresentativeMenuDto dto) {
+        List<Long> idList = dto.getCheckedMenuIds();
         int updateCount = 0;
         for (Long menuId : idList) {
             mapper.updateRepresentativeMenu(menuId);
@@ -57,8 +59,8 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public int deleteMenuByMenuId(Map<String, Long> menuId) {
-        Long id = menuId.get("menuId");
+    public int deleteMenuByMenuId(DeleteMenuDto dto) {
+        Long id = dto.getMenuId();
         return mapper.deleteMenuByMenuId(id);
     }
     @Override

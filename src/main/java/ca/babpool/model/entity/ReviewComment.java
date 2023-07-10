@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 public class ReviewComment {
 
+    private Long restaurantId;
     private Long reviewcommentId;
     private Long reviewId;
     private String reviewcommentContent;
@@ -17,6 +18,7 @@ public class ReviewComment {
 
     public static ReviewComment toEntity(ReviewCommentDto dto) {
         return ReviewComment.builder()
+                .restaurantId(dto.getRestaurantId())
                 .reviewcommentId(dto.getReviewcommentId())
                 .reviewId(dto.getReviewId())
                 .reviewcommentContent(dto.getReviewcommentContent())

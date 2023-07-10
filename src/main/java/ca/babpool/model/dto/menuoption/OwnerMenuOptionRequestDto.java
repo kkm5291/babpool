@@ -15,4 +15,5 @@ public class OwnerMenuOptionRequestDto {
     private String menuOptionCategory;
     private String menuOptionName;
     private Long menuOptionPrice;
+    private Long restaurantId;
 }

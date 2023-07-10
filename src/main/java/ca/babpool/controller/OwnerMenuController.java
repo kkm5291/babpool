@@ -1,6 +1,8 @@
 package ca.babpool.controller;
 
+import ca.babpool.model.dto.menu.DeleteMenuDto;
 import ca.babpool.model.dto.menu.MenuDto;
+import ca.babpool.model.dto.menu.RepresentativeMenuDto;
 import ca.babpool.model.dto.menuoption.OwnerMenuOptionRequestDto;
 import ca.babpool.model.dto.menuoption.OwnerMenuOptionResponseDto;
 import ca.babpool.model.response.ApiResponse;
@@ -33,13 +35,13 @@ public class OwnerMenuController {
     }
 
     @Operation(summary = "Menu 업데이트하기")
-    @PatchMapping("/{restaurantId}")
+    @PostMapping("/update")
     public CommonResult updateMenu(@RequestBody MenuDto menuDto) {
         return apiResponse.getSuccessResult(menuService.updateMenu(menuDto));
     }
 
     @Operation(summary = "Menu 추가하기")
-    @PostMapping("/{restaurantId}")
+    @PostMapping("/add")
     public SingleResult<Integer> addMenu(@RequestBody MenuDto menuDto) throws IOException {
         return apiResponse.getSingleResult(menuService.insertMenu(menuDto));
     }
@@ -51,15 +53,15 @@ public class OwnerMenuController {
     }
 
     @Operation(summary = "대표메뉴 설정하기")
-    @PostMapping("/{restaurantId}/representative")
-    public CommonResult updateRepresentativeMenu(@RequestBody Map<String, List<Long>> menuIdList) {
-        return apiResponse.getSuccessResult(menuService.updateRepresentativeMenu(menuIdList));
+    @PostMapping("/representative")
+    public CommonResult updateRepresentativeMenu(@RequestBody RepresentativeMenuDto dto) {
+        return apiResponse.getSuccessResult(menuService.updateRepresentativeMenu(dto));
     }
 
     @Operation(summary = "메뉴 삭제")
-    @PostMapping("/{restaurantId}/deleteMenu")
-    public CommonResult deleteMenu(@RequestBody Map<String, Long> menuId) {
-        return apiResponse.getSingleResult(menuService.deleteMenuByMenuId(menuId));
+    @PostMapping("/deleteMenu")
+    public CommonResult deleteMenu(@RequestBody DeleteMenuDto dto) {
+        return apiResponse.getSingleResult(menuService.deleteMenuByMenuId(dto));
     }
 
     @Operation(summary = "품절, 숨기기 메뉴 가져오기")
@@ -75,14 +77,14 @@ public class OwnerMenuController {
     }
 
     @Operation(summary = "메뉴 옵션 추가하기")
-    @PostMapping("/{restaurantId}/menuOption")
-    public CommonResult addMenuOption(@RequestBody OwnerMenuOptionRequestDto dto, @PathVariable("restaurantId") Long restaurantId) {
-        return apiResponse.getSuccessResult(menuOptionService.addMenuOptionAndMenuOptionGroup(dto, restaurantId));
+    @PostMapping("/menuOption/add")
+    public CommonResult addMenuOption(@RequestBody OwnerMenuOptionRequestDto dto) {
+        return apiResponse.getSuccessResult(menuOptionService.addMenuOptionAndMenuOptionGroup(dto, dto.getRestaurantId()));
     }
 
     @Operation(summary = "메뉴 옵션 변경하기")
-    @PatchMapping("/{restaurantId}/menuOption")
-    public CommonResult modifyMenuOption(@RequestBody OwnerMenuOptionRequestDto dto, @PathVariable("restaurantId") Long restaurantId) {
-        return apiResponse.getSuccessResult(menuOptionService.updateMenuOption(dto, restaurantId));
+    @PostMapping("/menuOption/update")
+    public CommonResult modifyMenuOption(@RequestBody OwnerMenuOptionRequestDto dto) {
+        return apiResponse.getSuccessResult(menuOptionService.updateMenuOption(dto, dto.getRestaurantId()));
     }
 }
