@@ -5,13 +5,19 @@ import ca.babpool.model.dto.orderdetails.OrderDetailsDto;
 import ca.babpool.model.dto.orders.*;
 import ca.babpool.model.dto.restaurant.RestaurantNewOrderDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrdersMapper ordersMapper;
@@ -46,9 +52,6 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        couponMapper.deleteCoupon(dto.getCouponId());
-        return 1;
+        return couponMapper.deleteCoupon(dto.getCouponId());
     }
-
-
 }

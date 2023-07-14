@@ -11,6 +11,8 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +20,15 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-@Async
+@Slf4j
 public class FCMNotificationService {
 
     private final FirebaseMessaging firebaseMessaging;
     private final MemberMapper memberMapper;
     private final RestaurantMapper restaurantMapper;
 
-    public String sendNotificationByToken(FCMNotificationRequestDto requestDto) {
+    @Async
+    public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
         Optional<Member> member = Optional.ofNullable(memberMapper.findById(requestDto.getTargetUserId()));
 
         if (member.isPresent()) {
@@ -43,15 +46,14 @@ public class FCMNotificationService {
 
                 try {
                     firebaseMessaging.send(message);
-                    return "알림전송 완료. targetUserId=" + requestDto.getTargetUserId();
                 } catch (FirebaseMessagingException e) {
-                    return "알림보내기 실패. targetUserId=" + requestDto.getTargetUserId();
+                    e.printStackTrace();
                 }
             } else {
-                return "서버에 저장된 해당 유저의 FirebaseToken이 존재하지 않습니다. targetUserId = " + requestDto.getTargetUserId();
+                log.info("로그아웃 된 회원입니다");
             }
         } else {
-            return "해당 유저가 존재하지 않습니다. targetUserId=" + requestDto.getTargetUserId();
+            log.info("잘못된 사용자 입니다.");
         }
     }
 
