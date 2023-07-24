@@ -4,6 +4,8 @@ import ca.babpool.mapper.*;
 import ca.babpool.model.dto.orderdetails.OrderDetailsDto;
 import ca.babpool.model.dto.orders.*;
 import ca.babpool.model.dto.restaurant.RestaurantNewOrderDto;
+import ca.babpool.model.entity.OrderMenu;
+import ca.babpool.model.entity.OrderMenuSub;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,29 +33,40 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public int insertNewOrder(RestaurantNewOrderDto dto) {
-        OrdersDto ordersDto = dto.getOrdersDto();
-        OrderDetailsDto orderDetailsDto = dto.getOrderDetailsDto();
-        List<OrderMenuRequestDto> orderMenuRequestDtoList = dto.getOrderMenuRequestDtoList();
+        Long ordersId = addOrders(dto.getOrdersDto());
+        addOrderDetails(dto.getOrderDetailsDto(), ordersId);
+        addOrderMenuItems(dto.getOrderMenuRequestDtoList(), ordersId);
+        return couponMapper.deleteCoupon(dto.getCouponId());
+    }
 
-        ordersMapper.addOrders(ordersDto);
-        Long ordersId = ordersDto.getOrdersId();
+    private void addOrderMenuSubItems(List<OrderMenuSubDto> orderMenuSubDtoList, Long orderMenuId) {
+        for (OrderMenuSubDto orderMenuSubDto : orderMenuSubDtoList) {
+            orderMenuSubDto.setOrderMenuId(orderMenuId);
+            orderMenuSubMapper.addOrderMenuSub(orderMenuSubDto);
+        }
+    }
 
+    private void addOrderMenuItems(List<OrderMenuRequestDto> orderMenuRequestDtoList, Long ordersId) {
+        for (OrderMenuRequestDto orderMenuRequestDto : orderMenuRequestDtoList) {
+            Long orderMenuId = addOrderMenu(orderMenuRequestDto, ordersId);
+            addOrderMenuSubItems(orderMenuRequestDto.getOrderMenuSubDtoList(), orderMenuId);
+        }
+    }
+
+    private Long addOrderMenu(OrderMenuRequestDto orderMenuRequestDto, Long ordersId) {
+        orderMenuRequestDto.setOrdersId(ordersId);
+        orderMenuMapper.addOrderMenu(orderMenuRequestDto);
+        return orderMenuRequestDto.getOrderMenuId();
+    }
+
+    private void addOrderDetails(OrderDetailsDto orderDetailsDto, Long ordersId) {
         orderDetailsDto.setOrdersId(ordersId);
         orderDetailsMapper.addOrderDetails(orderDetailsDto);
+    }
 
-        for (OrderMenuRequestDto orderMenuRequestDto : orderMenuRequestDtoList) {
-            orderMenuRequestDto.setOrdersId(ordersId);
-
-            orderMenuMapper.addOrderMenu(orderMenuRequestDto);
-            Long orderMenuId = orderMenuRequestDto.getOrderMenuId();
-            List<OrderMenuSubDto> orderMenuSubDtoList = orderMenuRequestDto.getOrderMenuSubDtoList();
-
-            for (OrderMenuSubDto orderMenuSubDto : orderMenuSubDtoList) {
-                orderMenuSubDto.setOrderMenuId(orderMenuId);
-                orderMenuSubMapper.addOrderMenuSub(orderMenuSubDto);
-            }
-        }
-
-        return couponMapper.deleteCoupon(dto.getCouponId());
+    private Long addOrders(OrdersDto ordersDto) {
+        ordersMapper.addOrders(ordersDto);
+        Long ordersId = ordersDto.getOrdersId();
+        return ordersId;
     }
 }

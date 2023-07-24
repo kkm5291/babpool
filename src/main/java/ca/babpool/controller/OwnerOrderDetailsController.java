@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/orderDetails")
+@RequestMapping("api/v1/order/details")
 public class OwnerOrderDetailsController {
 
     private final OrderDetailsService orderDetailsService;

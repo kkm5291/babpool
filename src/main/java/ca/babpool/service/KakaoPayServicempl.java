@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 public class KakaoPayServicempl implements KakaoPayService{
     static final String cid = "TC0ONETIME";
 
-    static final String url = "http://172.30.1.50:3000";
+    static final String url = "http://localhost:3000";
     private final SqlSession sqlSession;
 
     @Value("${kakao.admin.key}")

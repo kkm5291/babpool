@@ -59,31 +59,31 @@ public class OwnerMenuController {
     }
 
     @Operation(summary = "메뉴 삭제")
-    @PostMapping("/deleteMenu")
+    @PostMapping("/delete")
     public CommonResult deleteMenu(@RequestBody DeleteMenuDto dto) {
         return apiResponse.getSingleResult(menuService.deleteMenuByMenuId(dto));
     }
 
     @Operation(summary = "품절, 숨기기 메뉴 가져오기")
-    @GetMapping("/{restaurantId}/soldOutHide")
+    @GetMapping("/{restaurantId}/hide")
     public ListResult<MenuDto> selectHideOrSoldOutMenu(@PathVariable("restaurantId") Long restaurantId) {
         return apiResponse.getListResult(menuService.selectHideOrSoldOutMenu(restaurantId));
     }
 
     @Operation(summary = "메뉴 옵션 목록 가져오기")
-    @GetMapping("/{restaurantId}/menuOption")
+    @GetMapping("/{restaurantId}/option")
     public ListResult<OwnerMenuOptionResponseDto> selectMenuOption(@PathVariable("restaurantId") Long restaurantId) {
         return apiResponse.getListResult(menuOptionService.findMenuOptionByRestaurantId(restaurantId));
     }
 
     @Operation(summary = "메뉴 옵션 추가하기")
-    @PostMapping("/menuOption/add")
+    @PostMapping("/option/add")
     public CommonResult addMenuOption(@RequestBody OwnerMenuOptionRequestDto dto) {
         return apiResponse.getSuccessResult(menuOptionService.addMenuOptionAndMenuOptionGroup(dto, dto.getRestaurantId()));
     }
 
     @Operation(summary = "메뉴 옵션 변경하기")
-    @PostMapping("/menuOption/update")
+    @PostMapping("/option/update")
     public CommonResult modifyMenuOption(@RequestBody OwnerMenuOptionRequestDto dto) {
         return apiResponse.getSuccessResult(menuOptionService.updateMenuOption(dto, dto.getRestaurantId()));
     }

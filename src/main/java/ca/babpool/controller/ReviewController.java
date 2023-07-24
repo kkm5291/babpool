@@ -51,7 +51,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "리뷰에서 단골쿠폰 발급")
-    @PostMapping("/owner/newCoupon")
+    @PostMapping("/owner/coupon")
     public CommonResult addCoupon(@RequestBody CouponDto couponDto) {
         return apiResponse.getSuccessResult(couponService.addNewCoupon(couponDto));
     }
