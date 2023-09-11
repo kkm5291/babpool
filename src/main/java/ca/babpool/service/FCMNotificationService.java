@@ -1,5 +1,6 @@
 package ca.babpool.service;
 
+import ca.babpool.exception.InvalidApiRequestException;
 import ca.babpool.mapper.MemberMapper;
 import ca.babpool.mapper.RestaurantMapper;
 import ca.babpool.model.dto.firebase.FCMNotificationRequestDto;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -28,6 +31,7 @@ public class FCMNotificationService {
     private final RestaurantMapper restaurantMapper;
 
     @Async
+    @Transactional(propagation = Propagation.NESTED)
     public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
         Optional<Member> member = Optional.ofNullable(memberMapper.findById(requestDto.getTargetUserId()));
 
@@ -47,7 +51,21 @@ public class FCMNotificationService {
                 try {
                     firebaseMessaging.send(message);
                 } catch (FirebaseMessagingException e) {
-                    e.printStackTrace();
+                    int maxRetries = 3;
+                    int retryCount = 0;
+
+                    while (retryCount < maxRetries) {
+                        try {
+                            firebaseMessaging.send(message);
+                            break;
+                        } catch (FirebaseMessagingException retryException) {
+                            e.printStackTrace();
+                            retryCount++;
+                            if (retryCount >= maxRetries) {
+                                log.info("파이어베이스 3회 이상 시도시에도 오류발생");
+                            }
+                        }
+                    }
                 }
             } else {
                 log.info("로그아웃 된 회원입니다");

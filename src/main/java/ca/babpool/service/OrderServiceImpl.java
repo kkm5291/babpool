@@ -33,10 +33,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public int insertNewOrder(RestaurantNewOrderDto dto) {
+        couponMapper.deleteCoupon(dto.getCouponId());
         Long ordersId = addOrders(dto.getOrdersDto());
-        addOrderDetails(dto.getOrderDetailsDto(), ordersId);
         addOrderMenuItems(dto.getOrderMenuRequestDtoList(), ordersId);
-        return couponMapper.deleteCoupon(dto.getCouponId());
+        return addOrderDetails(dto.getOrderDetailsDto(), ordersId);
     }
 
     private void addOrderMenuSubItems(List<OrderMenuSubDto> orderMenuSubDtoList, Long orderMenuId) {
@@ -59,9 +59,9 @@ public class OrderServiceImpl implements OrderService {
         return orderMenuRequestDto.getOrderMenuId();
     }
 
-    private void addOrderDetails(OrderDetailsDto orderDetailsDto, Long ordersId) {
+    private int addOrderDetails(OrderDetailsDto orderDetailsDto, Long ordersId) {
         orderDetailsDto.setOrdersId(ordersId);
-        orderDetailsMapper.addOrderDetails(orderDetailsDto);
+        return orderDetailsMapper.addOrderDetails(orderDetailsDto);
     }
 
     private Long addOrders(OrdersDto ordersDto) {

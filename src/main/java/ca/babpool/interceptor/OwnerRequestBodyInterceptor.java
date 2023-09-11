@@ -17,7 +17,6 @@ public class OwnerRequestBodyInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("BodyInterceptor.preHandle");
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         String requestURI = request.getRequestURI();
         RequestBodyEndPoint requestBodyEndPoint = RequestBodyEndPoint.findByEndpoint(requestURI);

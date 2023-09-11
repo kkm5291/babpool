@@ -18,7 +18,7 @@ public interface OrderDetailsMapper {
 
     List<OrderDetailsResponseDto> getOrderDetailsByDate(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("restaurantId") Long restaurantId, @Param("offset") int offset, @Param("limit") int limit);
 
-    void addOrderDetails(OrderDetailsDto dto);
+    int addOrderDetails(OrderDetailsDto dto);
 
     List<OrderDetailsResponseDto> getOrderDetailsByCurDateAndNew(@Param("restaurantId") Long restaurantId, @Param("status") String status);
 

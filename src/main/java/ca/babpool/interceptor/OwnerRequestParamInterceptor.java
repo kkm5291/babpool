@@ -19,11 +19,9 @@ public class OwnerRequestParamInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("ParamInterceptor.preHandle");
         String memberId = SecurityContextHolder.getContext().getAuthentication().getName();
         String requestURI = request.getRequestURI();
         RequestParamEndpoint requestParamEndpoint = RequestParamEndpointMapping.findEndpoint(requestURI);
-        List<Long> loggedInRestaurantId = util.getLoggedInRestaurantIdList(memberId);
         Long requestRestaurantId;
 
         if (requestParamEndpoint != null) {
@@ -33,6 +31,7 @@ public class OwnerRequestParamInterceptor implements HandlerInterceptor {
             return false;
         }
 
+        List<Long> loggedInRestaurantId = util.getLoggedInRestaurantIdList(memberId);
         if (!loggedInRestaurantId.contains(requestRestaurantId)) {
             response.sendRedirect("/api/error/AuthenticationException");
             return false;
