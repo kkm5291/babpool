@@ -1,13 +1,11 @@
 package ca.babpool.model.dto.firebase;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class FCMNotificationRequestDto {
     private String targetUserId;
     private String title;

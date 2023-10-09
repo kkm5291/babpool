@@ -7,13 +7,15 @@ import ca.babpool.model.dto.firebase.FCMNotificationRequestDto;
 import ca.babpool.model.dto.restaurant.RestaurantFcmDto;
 import ca.babpool.model.dto.restaurant.RestaurantNewOrderDto;
 import ca.babpool.model.entity.Member;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,10 +31,14 @@ public class FCMNotificationService {
     private final FirebaseMessaging firebaseMessaging;
     private final MemberMapper memberMapper;
     private final RestaurantMapper restaurantMapper;
+    private final ObjectMapper objectMapper;
 
-    @Async
+
     @Transactional(propagation = Propagation.NESTED)
-    public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
+    @KafkaListener(topics = "babpool-fcm", groupId = "babpool")
+    public void sendNotificationByToken(String jsonDto) throws JsonProcessingException {
+        FCMNotificationRequestDto requestDto = objectMapper.readValue(jsonDto, FCMNotificationRequestDto.class);
+        System.out.println(requestDto.toString());
         Optional<Member> member = Optional.ofNullable(memberMapper.findById(requestDto.getTargetUserId()));
 
         if (member.isPresent()) {
@@ -45,27 +51,14 @@ public class FCMNotificationService {
                 Message message = Message.builder()
                         .putData("restaurantId", String.valueOf(requestDto.getRestaurantId()))
                         .setToken(member.get().getMemberFireBaseToken())
+//                        .setToken("cc3dvL_4PV1xTB1Xdjc-7y:APA91bEZX0XNgGgYVbN8RRS3lhVdobf9Zdp_iJUCeYJtLMORW7HmdHRDbCp9zNkW-WqFr5k-MBe5TjA9Rw76jjaGW-L2WuPVtiQL_ZWqDucb7DhnhBm9iXRC8dkEVuLI5nUjPAxA5lp812")
                         .setNotification(notification)
                         .build();
-
                 try {
                     firebaseMessaging.send(message);
                 } catch (FirebaseMessagingException e) {
-                    int maxRetries = 3;
-                    int retryCount = 0;
-
-                    while (retryCount < maxRetries) {
-                        try {
-                            firebaseMessaging.send(message);
-                            break;
-                        } catch (FirebaseMessagingException retryException) {
-                            e.printStackTrace();
-                            retryCount++;
-                            if (retryCount >= maxRetries) {
-                                log.info("파이어베이스 3회 이상 시도시에도 오류발생");
-                            }
-                        }
-                    }
+                    e.printStackTrace();
+                    throw new InvalidApiRequestException();
                 }
             } else {
                 log.info("로그아웃 된 회원입니다");

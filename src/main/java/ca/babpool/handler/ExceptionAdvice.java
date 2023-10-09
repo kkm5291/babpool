@@ -3,6 +3,7 @@ package ca.babpool.handler;
 import ca.babpool.exception.InvalidApiRequestException;
 import ca.babpool.model.response.ApiResponse;
 import ca.babpool.model.response.CommonResult;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -67,5 +68,11 @@ public class ExceptionAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected CommonResult DataIntegrityViolationException() {
         return apiResponse.getFailResult(ErrorCode.DATA_INTEGRITY_VIOLATION_EXCEPTION.getCode(), ErrorCode.DATA_INTEGRITY_VIOLATION_EXCEPTION.getDescription());
+    }
+
+    @ExceptionHandler(FirebaseMessagingException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected CommonResult FirebaseMessagingException() {
+        return apiResponse.getFailResult("F-400", "파이어베이스 예외 발생");
     }
 }
