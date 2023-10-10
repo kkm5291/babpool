@@ -1,6 +1,6 @@
 package ca.babpool.service;
 
-import ca.babpool.exception.InvalidApiRequestException;
+import ca.babpool.exception.FcmException;
 import ca.babpool.mapper.MemberMapper;
 import ca.babpool.mapper.RestaurantMapper;
 import ca.babpool.model.dto.firebase.FCMNotificationRequestDto;
@@ -16,11 +16,11 @@ import com.google.firebase.messaging.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,12 +35,44 @@ public class FCMNotificationService {
 
 
     @Transactional(propagation = Propagation.NESTED)
-    @KafkaListener(topics = "babpool-fcm", groupId = "babpool")
+    @KafkaListener(topics = "babpool-fcm", groupId = "babpool", errorHandler = "fcmErrorHandler")
     public void sendNotificationByToken(String jsonDto) throws JsonProcessingException {
-        FCMNotificationRequestDto requestDto = objectMapper.readValue(jsonDto, FCMNotificationRequestDto.class);
-        System.out.println(requestDto.toString());
-        Optional<Member> member = Optional.ofNullable(memberMapper.findById(requestDto.getTargetUserId()));
+        try {
+            processAndSendMessage(jsonDto);
+        } catch (FirebaseMessagingException e) {
+            throw new FcmException(e.getMessagingErrorCode());
+        }
+    }
 
+    @KafkaListener(topics = "babpool-fcm-r", groupId = "babpool", errorHandler = "reFcmErrorHandler")
+    public void reSendNotificationByToken(String jsonDto) throws JsonProcessingException {
+
+        int maxRetryAttempts = 2;
+        int currentRetryAttempt = 0;
+
+        while (currentRetryAttempt < maxRetryAttempts) {
+            try {
+                processAndSendMessage(jsonDto);
+                break;
+            } catch (FirebaseMessagingException e) {
+                currentRetryAttempt++;
+                if (currentRetryAttempt < maxRetryAttempts) {
+                    try {
+                        Thread.sleep(1000);
+
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    throw new FcmException(e.getMessagingErrorCode());
+                }
+            }
+        }
+    }
+
+    private void processAndSendMessage(String jsonDto) throws JsonProcessingException, FirebaseMessagingException {
+        FCMNotificationRequestDto requestDto = objectMapper.readValue(jsonDto, FCMNotificationRequestDto.class);
+        Optional<Member> member = Optional.ofNullable(memberMapper.findById(requestDto.getTargetUserId()));
         if (member.isPresent()) {
             if (member.get().getMemberFireBaseToken() != null) {
                 Notification notification = Notification.builder()
@@ -51,19 +83,17 @@ public class FCMNotificationService {
                 Message message = Message.builder()
                         .putData("restaurantId", String.valueOf(requestDto.getRestaurantId()))
                         .setToken(member.get().getMemberFireBaseToken())
-//                        .setToken("cc3dvL_4PV1xTB1Xdjc-7y:APA91bEZX0XNgGgYVbN8RRS3lhVdobf9Zdp_iJUCeYJtLMORW7HmdHRDbCp9zNkW-WqFr5k-MBe5TjA9Rw76jjaGW-L2WuPVtiQL_ZWqDucb7DhnhBm9iXRC8dkEVuLI5nUjPAxA5lp812")
+                        .setToken("cc3dvL_4PV1xTB1Xdjc-7y:APA91bEZX0XNgGgYVbN8RRS3lhVdobf9Zdp_iJUCeYJtLMORW7HmdHRDbCp9zNkW-WqFr5k-MBe5TjA9Rw76jjaGW-L2WuPVtiQL_ZWqDucb7DhnhBm9iXRC8dkEVuLI5nUjPAxA5lp812")
                         .setNotification(notification)
                         .build();
-                try {
-                    firebaseMessaging.send(message);
-                } catch (FirebaseMessagingException e) {
-                    e.printStackTrace();
-                    throw new InvalidApiRequestException();
-                }
+
+                firebaseMessaging.send(message);
             } else {
+                // 여기도 예외 처리
                 log.info("로그아웃 된 회원입니다");
             }
         } else {
+            // 여기도 예외 처리
             log.info("잘못된 사용자 입니다.");
         }
     }
