@@ -32,10 +32,8 @@ public class OrderController {
     @PostMapping("/new")
     public CommonResult restaurantNewOrder(@RequestBody RestaurantNewOrderDto dto) throws SQLException, IOException {
         int result = orderService.insertNewOrder(dto);
-        // kafka 프로듀서
         if (result == 1) {
             this.kafkaProducer.sendMessage(fcmNotificationService.createNotificationDto(dto));
-//            fcmNotificationService.sendNotificationByToken(fcmNotificationService.createNotificationDto(dto));
             return apiResponse.getSuccessResult(result);
         } else {
             return apiResponse.getFailResult();

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 public class FcmErrorHandler implements KafkaListenerErrorHandler {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     @Value("${spring.kafka.r-topic}")
     private String DEAD_TOPIC;
 
@@ -37,12 +36,10 @@ public class FcmErrorHandler implements KafkaListenerErrorHandler {
         FcmException fcmException = (FcmException) exception.getCause();
         MessagingErrorCode status = fcmException.getStatus();
 
-        // status 값을 로그 또는 처리에 활용
-        // UNAVAILABLE, INTERNAL시 3회 재전송
-        if (status == MessagingErrorCode.UNAVAILABLE || status == MessagingErrorCode.INTERNAL || status == MessagingErrorCode.INVALID_ARGUMENT) {
+        if (status == MessagingErrorCode.UNAVAILABLE || status == MessagingErrorCode.INTERNAL) {
             kafkaTemplate.send(DEAD_TOPIC, (String) (message.getPayload()));
         } else {
-            log.error(fcmError);
+            return null;
         }
         return null;
     }
